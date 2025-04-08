@@ -80,10 +80,16 @@ def create_order():
 @app.route('/orders', methods=['GET'])
 def route_get_orders():
     orders = get_all_orders()
+    print("orders", orders)
     return jsonify([{
         'id': o.id,
         'supplier_id': o.supplier_id,
-        'status': o.status
+        'status': o.status,
+        'products': o.products,
+        'company_name': o.company_name,
+        'representative_name': o.representative_name,
+        'phone_number': o.phone_number
+
     } for o in orders])
 
 @app.route('/orders/<int:supplier_id>', methods=['GET'])
@@ -93,19 +99,13 @@ def route_get_order_by_id(supplier_id):
     if not supplier:
         return jsonify({'message': 'Supplier not found'}), 404
 
-    # אם הספק הוא בעל המכולת, נחזיר את כל הספקים
-    # if supplier.role == "owner":
-    #     result = get_orders_by_supplier_id(supplier_id)
-    #     return jsonify(result)  # תחזיר את כל הספקים
-
-    # אחרת, נחזיר את ההזמנות של הספק הספציפי
     orders = Orders.query.filter_by(supplier_id=supplier_id).all()
     print("orders", orders)
     return jsonify([{
         'id': o.id,
         'supplier_id': o.supplier_id,
         'status': o.status,
-        'products': o.products,  # Assuming products is a JSON field
+        'products': o.products,
     } for o in orders])
 
 
