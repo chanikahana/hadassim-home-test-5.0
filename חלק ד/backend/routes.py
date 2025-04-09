@@ -11,7 +11,7 @@ def route_get_suppliers():
         'company_name': s['company_name'],
         'phone_number': s['phone_number'],
         'representative_name': s['representative_name'],
-        'goods': s['goods']  # מוסיפים את המוצרים של כל ספק
+        'goods': s['goods']  
     } for s in suppliers])
 
 
@@ -30,11 +30,10 @@ def route_login():
     print("supplier", supplier.id)
 
     if supplier:
-        # מחזירים את ה-role ביחד עם המידע של הספק
         return jsonify({
             'message': 'Login successful',
             'supplier_id': supplier.id,
-            'role': supplier.role  # הוספנו את ה-role כאן
+            'role': supplier.role  
         })
     
     return jsonify({'message': 'Invalid credentials'}), 401
@@ -60,19 +59,29 @@ def route_get_goods(supplier_id):
 def create_order():
     data = request.json
 
+    supplier_id = data['supplier_id']
+    products = data['products']
+
+    # שליפת הספק מהמסד
+    supplier = Suppliers.query.get(supplier_id)
+    if not supplier:
+        return jsonify({'error': 'Supplier not found'}), 404
+
+    # יצירת ההזמנה עם פרטי הספק
     new_order = Orders(
-        supplier_id=data['supplier_id'],
-        status='new',
-        products=data['products'],  # שדה JSON בטבלה
-        company_name=data['company_name'],
-        representative_name=data['representative_name'],
-        phone_number=data['phone_number']
+        supplier_id=supplier_id,
+        status='new',  # או 'new' אם זה השם שבחרת
+        products=products,
+        company_name=supplier.company_name,
+        representative_name=supplier.representative_name,
+        phone_number=supplier.phone_number
     )
 
     db.session.add(new_order)
     db.session.commit()
 
     return jsonify({'message': 'Order created'}), 201
+
 
 
 
@@ -114,7 +123,6 @@ def route_get_order_by_id(supplier_id):
 def route_approve_order(order_id):
     order = Orders.query.get(order_id)
     if order:
-        # קריאה לפונקציה שמבצעת את שינוי הסטטוס
         status_changed = approve_order_status(order)
         
         if status_changed:

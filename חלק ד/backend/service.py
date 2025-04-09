@@ -10,6 +10,7 @@ def get_all_suppliers():
     for supplier in suppliers:
         goods_list = [{
             'product_name': g.product_name,
+            'price_per_item': g.price_per_item,  # הוסף את המחיר לכל מוצר
             'min_quantity': g.min_quantity  # הוסף את הכמות המינימלית לכל מוצר
         } for g in supplier.goods]  # בדוק אם יש את המאפיינים הללו
         result.append({
@@ -51,7 +52,7 @@ def get_orders_by_supplier_id(supplier_id):
         result = []
         for s in suppliers:
             goods = Goods.query.filter_by(supplier_id=s.id).all()
-            goods_list = [g.name for g in goods]  # נניח שלמוצר יש שדה 'name'
+            goods_list = [g.name for g in goods]  
             
             result.append({
                 'id': s.id,
@@ -66,7 +67,6 @@ def get_orders_by_supplier_id(supplier_id):
         return Orders.query.filter_by(supplier_id=supplier_id).all()
 
 def approve_order_status(order):
-    # בודק את הסטטוס הנוכחי ומבצע את השינוי
     if order.status == 'new':
         order.status = 'Pending'
         return True
@@ -74,5 +74,4 @@ def approve_order_status(order):
         order.status = 'Completed'
         return True
     else:
-        # אם לא צריך לשנות את הסטטוס (כמו במקרה של Completed), נחזיר False
         return False
